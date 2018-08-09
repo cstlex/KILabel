@@ -51,6 +51,8 @@ NSString * const KILabelLinkKey = @"link";
 // During a touch, range of text that is displayed as selected
 @property (nonatomic, assign) NSRange selectedRange;
 
+@property (assign, nonatomic) NSRange userDefinedUserHandleRange;
+
 @end
 
 #pragma mark - Implementation
@@ -120,6 +122,8 @@ NSString * const KILabelLinkKey = @"link";
     // By default we hilight the selected link during a touch to give feedback that we are
     // responding to touch.
     _selectedLinkBackgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+    
+    _userDefinedUserHandleRange.length = 0;
     
     // Establish the text store with our current text
     [self updateTextStoreWithText];
@@ -230,7 +234,11 @@ NSString * const KILabelLinkKey = @"link";
     // Pass the text to the super class first
     [super setAttributedText:attributedText];
     
-    [self updateTextStoreWithAttributedString:attributedText];
+    @try {
+        [self updateTextStoreWithAttributedString:attributedText];
+    } @catch (NSException *e){
+        NSLog(@"%@", e);
+    }
 }
 
 - (void)setSystemURLStyle:(BOOL)systemURLStyle
@@ -266,6 +274,10 @@ NSString * const KILabelLinkKey = @"link";
     
     // Force refresh text
     self.text = self.text;
+}
+
+- (void)setUserHandleForRange:(NSRange)range {
+    _userDefinedUserHandleRange = range;
 }
 
 #pragma mark - Text Storage Management
@@ -395,6 +407,11 @@ NSString * const KILabelLinkKey = @"link";
 {
     NSMutableArray *rangesForUserHandles = [[NSMutableArray alloc] init];
     
+    if (_userDefinedUserHandleRange.length > 0)
+        [rangesForUserHandles addObject:@{KILabelLinkTypeKey : @(KILinkTypeUserHandle),
+                                      KILabelRangeKey : [NSValue valueWithRange:_userDefinedUserHandleRange],
+                                      KILabelLinkKey : [text substringWithRange:_userDefinedUserHandleRange]}];
+    
     // Setup a regular expression for user handles and hashtags
     static NSRegularExpression *regex = nil;
     static dispatch_once_t onceToken;
@@ -410,6 +427,9 @@ NSString * const KILabelLinkKey = @"link";
     for (NSTextCheckingResult *match in matches)
     {
         NSRange matchRange = [match range];
+        if (_userDefinedUserHandleRange.length > 0 && NSIntersectionRange(matchRange, _userDefinedUserHandleRange).length > 0){
+            continue;
+        }
         NSString *matchString = [text substringWithRange:matchRange];
         
         if (![self ignoreMatch:matchString])
@@ -638,7 +658,7 @@ NSString * const KILabelLinkKey = @"link";
     NSDictionary *touchedLink;
     CGPoint touchLocation = [[touches anyObject] locationInView:self];
     touchedLink = [self linkAtPoint:touchLocation];
-    
+
     if (touchedLink)
     {
         self.selectedRange = [[touchedLink objectForKey:KILabelRangeKey] rangeValue];

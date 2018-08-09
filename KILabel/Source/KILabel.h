@@ -194,6 +194,8 @@ IB_DESIGNABLE
  */
 - (nullable NSDictionary*)linkAtPoint:(CGPoint)point;
 
+- (void)setUserHandleForRange:(NSRange)range;
+
 @end
 
 NS_ASSUME_NONNULL_END
