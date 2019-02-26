@@ -529,18 +529,20 @@ NSString * const KILabelLinkKey = @"link";
     for (NSDictionary *dictionary in linkRanges)
     {
         NSRange range = [[dictionary objectForKey:KILabelRangeKey] rangeValue];
-        KILinkType linkType = [dictionary[KILabelLinkTypeKey] unsignedIntegerValue];
-        
-        NSDictionary *attributes = [self attributesForLinkType:linkType];
-        
-        // Use our tint color to hilight the link
-        [attributedString addAttributes:attributes range:range];
-        
-        // Add an URL attribute if this is a URL
-        if (_systemURLStyle && ((KILinkType)[dictionary[KILabelLinkTypeKey] unsignedIntegerValue] == KILinkTypeURL))
-        {
-            // Add a link attribute using the stored link
-            [attributedString addAttribute:NSLinkAttributeName value:dictionary[KILabelLinkKey] range:range];
+        if (![[[string string] substringWithRange:range] hasPrefix:@"NOTEBOOK SENTENCE\n"]){
+            KILinkType linkType = [dictionary[KILabelLinkTypeKey] unsignedIntegerValue];
+            
+            NSDictionary *attributes = [self attributesForLinkType:linkType];
+            
+            // Use our tint color to hilight the link
+            [attributedString addAttributes:attributes range:range];
+            
+            // Add an URL attribute if this is a URL
+            if (_systemURLStyle && ((KILinkType)[dictionary[KILabelLinkTypeKey] unsignedIntegerValue] == KILinkTypeURL))
+            {
+                // Add a link attribute using the stored link
+                [attributedString addAttribute:NSLinkAttributeName value:dictionary[KILabelLinkKey] range:range];
+            }
         }
     }
     
