@@ -529,7 +529,7 @@ NSString * const KILabelLinkKey = @"link";
     for (NSDictionary *dictionary in linkRanges)
     {
         NSRange range = [[dictionary objectForKey:KILabelRangeKey] rangeValue];
-        if (![[[string string] substringWithRange:range] hasPrefix:@"NOTEBOOK SENTENCE\n"]){
+        if (![[[string string] substringWithRange:range] hasPrefix:@"SEND TO NOTEBOOK\n"]){
             KILinkType linkType = [dictionary[KILabelLinkTypeKey] unsignedIntegerValue];
             
             NSDictionary *attributes = [self attributesForLinkType:linkType];
