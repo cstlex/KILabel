@@ -62,6 +62,8 @@ NSString * const KILabelLinkKey = @"link";
     NSMutableDictionary *_linkTypeAttributes;
 }
 
+@synthesize clickHighlightRange;
+
 #pragma mark - Construction
 
 - (id)initWithFrame:(CGRect)frame
@@ -124,6 +126,8 @@ NSString * const KILabelLinkKey = @"link";
     _selectedLinkBackgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
     
     _userDefinedUserHandleRange.length = 0;
+    
+    clickHighlightRange.location = NSNotFound;
     
     // Establish the text store with our current text
     [self updateTextStoreWithText];
@@ -546,6 +550,10 @@ NSString * const KILabelLinkKey = @"link";
         }
     }
     
+    if (clickHighlightRange.location != NSNotFound){
+        [attributedString addAttribute:NSForegroundColorAttributeName value:_selectedLinkBackgroundColor range:clickHighlightRange];
+    }
+    
     return attributedString;
 }
 
@@ -700,6 +708,15 @@ NSString * const KILabelLinkKey = @"link";
         NSRange range = [[touchedLink objectForKey:KILabelRangeKey] rangeValue];
         NSString *touchedSubstring = [touchedLink objectForKey:KILabelLinkKey];
         KILinkType linkType = (KILinkType)[[touchedLink objectForKey:KILabelLinkTypeKey] intValue];
+        
+        clickHighlightRange = range;
+        [self setAttributedText:[self attributedText]];
+        [self setNeedsDisplay];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            clickHighlightRange.location = NSNotFound;
+            [self setAttributedText:[self attributedText]];
+            [self setNeedsDisplay];
+        });
         
         [self receivedActionForLinkType:linkType string:touchedSubstring range:range];
     }

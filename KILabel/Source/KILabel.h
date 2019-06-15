@@ -176,6 +176,8 @@ IB_DESIGNABLE
  */
 @property (nullable, nonatomic, copy) KILinkTapHandler urlLinkTapHandler;
 
+@property (assign, nonatomic) NSRange clickHighlightRange;
+
 /** ****************************************************************************************** **
  * @name Geometry
  ** ****************************************************************************************** **/
